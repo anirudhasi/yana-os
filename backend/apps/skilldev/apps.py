@@ -1,3 +1,5 @@
 from django.apps import AppConfig
-class Config(AppConfig):
-    name = 'apps.skilldev'
+
+class SkilldevConfig(AppConfig):
+    name = "apps.skilldev"
+    default_auto_field = "django.db.models.BigAutoField"

@@ -1,3 +1,5 @@
 from django.apps import AppConfig
-class Config(AppConfig):
-    name = 'apps.marketplace'
+
+class MarketplaceConfig(AppConfig):
+    name = "apps.marketplace"
+    default_auto_field = "django.db.models.BigAutoField"

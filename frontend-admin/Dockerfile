@@ -2,15 +2,19 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files first for better layer caching
+# Copy package file
 COPY package.json ./
 
-# Install dependencies
+# Clean install - resolves ajv peer dependency conflicts
 RUN npm install --legacy-peer-deps
 
-# Copy rest of source
+# Copy source
 COPY . .
 
 EXPOSE 3000
+
+ENV REACT_APP_API_URL=http://localhost:8000/api
+ENV WDS_SOCKET_PORT=0
+ENV CHOKIDAR_USEPOLLING=true
 
 CMD ["npm", "start"]

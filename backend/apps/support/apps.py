@@ -1,3 +1,5 @@
 from django.apps import AppConfig
-class Config(AppConfig):
-    name = 'apps.support'
+
+class SupportConfig(AppConfig):
+    name = "apps.support"
+    default_auto_field = "django.db.models.BigAutoField"
