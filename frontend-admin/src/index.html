@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yana OS — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --bg2: #141720;
+    --bg3: #1c2030;
+    --border: rgba(255,255,255,0.07);
+    --border-active: rgba(255,255,255,0.18);
+    --text: #e8eaf2;
+    --text2: #8b91a8;
+    --text3: #545a70;
+    --accent: #4f6ef7;
+    --accent2: #7b5bf5;
+    --green: #1db87a;
+    --amber: #f5a623;
+    --red: #e84545;
+    --teal: #1ac8b8;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+  /* ─── Sidebar ─── */
+  .sidebar {
+    width: 240px; min-height: 100vh; background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0;
+  }
+  .logo {
+    padding: 24px 20px 16px;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo span { color: var(--accent); }
+  .nav { padding: 12px 10px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: var(--radius-sm);
+    font-size: 13.5px; font-weight: 400; color: var(--text2);
+    cursor: pointer; transition: all 0.15s; margin-bottom: 2px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(79,110,247,0.12); color: var(--accent); font-weight: 500; }
+  .nav-item .icon { width: 18px; text-align: center; font-size: 15px; }
+  .nav-section { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; color: var(--text3); padding: 16px 14px 6px; text-transform: uppercase; }
+  .sidebar-footer {
+    padding: 16px 20px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 10px;
+  }
+  .avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
+
+  /* ─── Main ─── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow-x: hidden; }
+  .topbar {
+    height: 60px; background: var(--bg2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; position: sticky; top: 0; z-index: 10;
+  }
+  .topbar h1 { font-size: 15px; font-weight: 600; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px;
+    font-family: 'Sora', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.15s;
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3d5ce6; }
+  .btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--border-active); color: var(--text); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-danger { background: rgba(232,69,69,0.15); color: var(--red); border: 1px solid rgba(232,69,69,0.25); }
+  .btn-success { background: rgba(29,184,122,0.15); color: var(--green); border: 1px solid rgba(29,184,122,0.25); }
+
+  /* ─── Content ─── */
+  .content { padding: 28px; flex: 1; }
+
+  /* ─── Stats Row ─── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px;
+    transition: border-color 0.15s;
+  }
+  .stat-card:hover { border-color: var(--border-active); }
+  .stat-label { font-size: 11.5px; color: var(--text3); font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+  .stat-value { font-size: 28px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
+  .stat-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+  .badge-green { background: rgba(29,184,122,0.12); color: var(--green); }
+  .badge-amber { background: rgba(245,166,35,0.12); color: var(--amber); }
+  .badge-red { background: rgba(232,69,69,0.12); color: var(--red); }
+  .badge-blue { background: rgba(79,110,247,0.12); color: var(--accent); }
+  .badge-teal { background: rgba(26,200,184,0.12); color: var(--teal); }
+  .badge-gray { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+  /* ─── Tab navigation ─── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--bg2); padding: 4px; border-radius: var(--radius); border: 1px solid var(--border); display: inline-flex; }
+  .tab { padding: 8px 18px; border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text2); border: none; background: none; font-family: 'Sora', sans-serif; transition: all 0.15s; }
+  .tab.active { background: var(--bg3); color: var(--text); border: 1px solid var(--border-active); }
+
+  /* ─── Search / Filters ─── */
+  .toolbar { display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 14px;
+    flex: 1; max-width: 360px;
+  }
+  .search-box:focus-within { border-color: var(--accent); }
+  .search-box input { background: none; border: none; outline: none; color: var(--text); font-size: 13.5px; font-family: 'Sora', sans-serif; flex: 1; }
+  .search-box input::placeholder { color: var(--text3); }
+  .filter-select {
+    background: var(--bg2); border: 1px solid var(--border); color: var(--text2);
+    padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px;
+    font-family: 'Sora', sans-serif; outline: none; cursor: pointer;
+  }
+  .filter-select:focus { border-color: var(--accent); color: var(--text); }
+
+  /* ─── Table ─── */
+  .table-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .table-title { font-size: 14px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 11px 16px; font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); background: var(--bg); }
+  td { padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .rider-info { display: flex; align-items: center; gap: 10px; }
+  .rider-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--text2); flex-shrink: 0; }
+  .rider-name { font-weight: 500; font-size: 13.5px; }
+  .rider-phone { font-size: 11.5px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  .progress-bar { height: 4px; background: var(--bg3); border-radius: 4px; overflow: hidden; width: 80px; }
+  .progress-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
+
+  .vehicle-tag { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-family: 'DM Mono', monospace; }
+  .vehicle-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── Detail Drawer ─── */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; display: none; }
+  .drawer-overlay.open { display: block; }
+  .drawer {
+    position: fixed; right: 0; top: 0; bottom: 0; width: 500px;
+    background: var(--bg2); border-left: 1px solid var(--border);
+    z-index: 50; display: flex; flex-direction: column;
+    transform: translateX(100%); transition: transform 0.25s ease;
+    overflow-y: auto;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .drawer-head h2 { font-size: 15px; font-weight: 600; }
+  .drawer-body { padding: 24px; flex: 1; }
+  .close-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text2); width: 30px; height: 30px; border-radius: var(--radius-sm); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  .field-group { margin-bottom: 20px; }
+  .field-label { font-size: 11px; color: var(--text3); font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
+  .field-value { font-size: 14px; color: var(--text); }
+  .field-mono { font-family: 'DM Mono', monospace; font-size: 13px; }
+
+  .section-title { font-size: 12px; font-weight: 600; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin: 20px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+  .doc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .doc-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; }
+  .doc-type { font-size: 11.5px; font-weight: 500; margin-bottom: 6px; }
+  .doc-status { font-size: 11px; }
+
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+  .timeline-item { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+  .timeline-item::before { content: ''; position: absolute; left: 5px; top: 16px; bottom: 0; width: 1px; background: var(--border); }
+  .timeline-item:last-child::before { display: none; }
+  .timeline-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 3px; border: 2px solid var(--bg2); }
+  .timeline-content { flex: 1; }
+  .timeline-title { font-size: 13px; font-weight: 500; }
+  .timeline-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .action-row { display: flex; gap: 10px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+  /* ─── Vehicle cards ─── */
+  .vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .vehicle-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; cursor: pointer; transition: all 0.15s;
+  }
+  .vehicle-card:hover { border-color: var(--border-active); transform: translateY(-1px); }
+  .vehicle-card.unavailable { opacity: 0.55; }
+  .vc-reg { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .vc-type { font-size: 11.5px; color: var(--text3); margin-bottom: 14px; }
+  .vc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .vc-stat { background: var(--bg3); border-radius: var(--radius-sm); padding: 8px 10px; }
+  .vc-stat-label { font-size: 10px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .vc-stat-value { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .battery-bar { height: 6px; background: var(--bg3); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .battery-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+
+  /* ─── Empty state ─── */
+  .empty { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* ─── Loading ─── */
+  .skeleton { background: linear-gradient(90deg, var(--bg3) 25%, var(--bg2) 50%, var(--bg3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  /* ─── Notification badge ─── */
+  .notif { position: relative; }
+  .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--red); border-radius: 50%; border: 2px solid var(--bg2); }
+
+  /* ─── Alert ─── */
+  .alert { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 20px; }
+  .alert-amber { background: rgba(245,166,35,0.08); border: 1px solid rgba(245,166,35,0.2); color: var(--amber); }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">Yana <span>OS</span></div>
+  <nav class="nav">
+    <div class="nav-section">Operations</div>
+    <button class="nav-item active" onclick="setPage('onboarding')">
+      <span class="icon">🪪</span> Rider Onboarding
+    </button>
+    <button class="nav-item" onclick="setPage('vehicles')">
+      <span class="icon">🛵</span> Vehicle Allocation
+    </button>
+    <button class="nav-item" onclick="setPage('fleet')">
+      <span class="icon">🏭</span> Fleet / Maintenance
+    </button>
+    <div class="nav-section">Business</div>
+    <button class="nav-item" onclick="alert('Coming in Module 2')">
+      <span class="icon">💼</span> Job Marketplace
+    </button>
+    <button class="nav-item" onclick="alert('Coming in Module 2')">
+      <span class="icon">🏢</span> Sales / Clients
+    </button>
+    <button class="nav-item" onclick="alert('Coming in Module 3')">
+      <span class="icon">💰</span> Payments
+    </button>
+    <div class="nav-section">Admin</div>
+    <button class="nav-item" onclick="alert('Coming in Module 3')">
+      <span class="icon">📊</span> Analytics
+    </button>
+    <button class="nav-item" onclick="alert('Coming in Module 2')">
+      <span class="icon">🎓</span> Skill Dev
+    </button>
+    <button class="nav-item" onclick="alert('Settings coming soon')">
+      <span class="icon">⚙️</span> Settings
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar">AK</div>
+    <div>
+      <div style="font-size:12px;color:var(--text2);font-weight:500">Amit Kumar</div>
+      <div style="font-size:11px;">Admin · Bengaluru HQ</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="topbar">
+    <h1 id="page-title">Rider Onboarding</h1>
+    <div class="topbar-actions">
+      <div class="notif">
+        <button class="btn btn-ghost btn-sm">🔔</button>
+        <div class="notif-dot"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="alert('Export coming soon')">↓ Export</button>
+      <button class="btn btn-primary btn-sm" id="primary-action" onclick="handlePrimaryAction()">+ Add Rider</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- ─── Onboarding Page ─── -->
+    <div id="page-onboarding">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Applied</div>
+          <div class="stat-value" style="color:var(--text)">2,847</div>
+          <div class="stat-sub"><span class="stat-badge badge-green">↑ 12%</span> this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Review</div>
+          <div class="stat-value" style="color:var(--amber)">143</div>
+          <div class="stat-sub"><span class="stat-badge badge-amber">38 urgent</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Riders</div>
+          <div class="stat-value" style="color:var(--green)">1,204</div>
+          <div class="stat-sub"><span class="stat-badge badge-green">↑ 8%</span> vs last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">KYC Rejected</div>
+          <div class="stat-value" style="color:var(--red)">67</div>
+          <div class="stat-sub"><span class="stat-badge badge-red">2.4%</span> rejection rate</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="filterStatus('all', this)">All Riders</button>
+        <button class="tab" onclick="filterStatus('applied', this)">Applied</button>
+        <button class="tab" onclick="filterStatus('kyc_review', this)">KYC Review</button>
+        <button class="tab" onclick="filterStatus('training_pending', this)">Training</button>
+        <button class="tab" onclick="filterStatus('active', this)">Active</button>
+        <button class="tab" onclick="filterStatus('kyc_rejected', this)">Rejected</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span style="color:var(--text3)">🔍</span>
+          <input type="text" placeholder="Search by name, phone, city..." oninput="filterRiders(this.value)">
+        </div>
+        <select class="filter-select" onchange="filterHub(this.value)">
+          <option value="">All Hubs</option>
+          <option>Bengaluru — Koramangala</option>
+          <option>Bengaluru — Whitefield</option>
+          <option>Hyderabad — Madhapur</option>
+          <option>Chennai — Adyar</option>
+          <option>Mumbai — Andheri</option>
+        </select>
+        <select class="filter-select">
+          <option>Sort: Newest First</option>
+          <option>Sort: Oldest First</option>
+          <option>Sort: Score ↓</option>
+        </select>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Riders <span style="color:var(--text3);font-weight:400">(showing 10 of 2,847)</span></span>
+          <button class="btn btn-ghost btn-sm" onclick="alert('Bulk actions coming soon')">⚡ Bulk Actions</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Rider</th>
+              <th>Hub</th>
+              <th>Status</th>
+              <th>Onboarding</th>
+              <th>Score</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="riders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── Vehicles Page ─── -->
+    <div id="page-vehicles" style="display:none">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Fleet</div>
+          <div class="stat-value" style="color:var(--text)">384</div>
+          <div class="stat-sub">across 8 hubs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Available Now</div>
+          <div class="stat-value" style="color:var(--green)">142</div>
+          <div class="stat-sub"><span class="stat-badge badge-green">37%</span> utilization gap</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Allocated</div>
+          <div class="stat-value" style="color:var(--accent)">218</div>
+          <div class="stat-sub"><span class="stat-badge badge-blue">56.8%</span> utilization</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">In Maintenance</div>
+          <div class="stat-value" style="color:var(--amber)">24</div>
+          <div class="stat-sub"><span class="stat-badge badge-amber">6.2%</span> downtime</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="filterVehicles('all', this)">All Vehicles</button>
+        <button class="tab" onclick="filterVehicles('available', this)">Available</button>
+        <button class="tab" onclick="filterVehicles('allocated', this)">Allocated</button>
+        <button class="tab" onclick="filterVehicles('maintenance', this)">Maintenance</button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span style="color:var(--text3)">🔍</span>
+          <input type="text" placeholder="Search reg. number, make, model...">
+        </div>
+        <select class="filter-select">
+          <option>All Hubs</option>
+          <option>Koramangala</option>
+          <option>Whitefield</option>
+          <option>Madhapur</option>
+        </select>
+        <select class="filter-select">
+          <option>All Types</option>
+          <option>EV 2-Wheeler</option>
+          <option>EV 3-Wheeler</option>
+          <option>Petrol 2-Wheeler</option>
+        </select>
+      </div>
+
+      <div class="vehicle-grid" id="vehicle-grid"></div>
+    </div>
+
+    <!-- ─── Fleet page (allocations) ─── -->
+    <div id="page-fleet" style="display:none">
+      <div class="alert alert-amber">⚠️ 8 vehicles are due for service in the next 7 days. <a href="#" style="color:var(--amber);text-decoration:underline">Review maintenance schedule →</a></div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Active Allocations</div>
+          <div class="stat-value" style="color:var(--accent)">218</div>
+          <div class="stat-sub">Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Approval</div>
+          <div class="stat-value" style="color:var(--amber)">14</div>
+          <div class="stat-sub">Needs action</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Returns Today</div>
+          <div class="stat-value" style="color:var(--teal)">31</div>
+          <div class="stat-sub">Scheduled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Revenue Today</div>
+          <div class="stat-value" style="color:var(--green)">₹43.2K</div>
+          <div class="stat-sub"><span class="stat-badge badge-green">↑ 5%</span> vs yesterday</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-header">
+          <span class="table-title">Current Allocations</span>
+          <button class="btn btn-primary btn-sm" onclick="alert('Manual allocation modal')">+ Assign Vehicle</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Rider</th>
+              <th>Vehicle</th>
+              <th>Plan</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Daily Rent</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="allocations-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ─── Rider Detail Drawer ─── -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="rider-drawer">
+  <div class="drawer-head">
+    <h2 id="drawer-title">Rider Detail</h2>
+    <button class="close-btn" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<script>
+// ─── State ──────────────────────────────────────────────────────────────────
+let currentPage = 'onboarding';
+let currentStatusFilter = 'all';
+let searchQuery = '';
+
+const STATUS_CONFIG = {
+  applied:         { label: 'Applied',          cls: 'badge-blue' },
+  docs_pending:    { label: 'Docs Pending',      cls: 'badge-amber' },
+  docs_uploaded:   { label: 'Docs Uploaded',     cls: 'badge-blue' },
+  kyc_review:      { label: 'KYC Review',        cls: 'badge-amber' },
+  kyc_rejected:    { label: 'KYC Rejected',      cls: 'badge-red' },
+  training_pending:{ label: 'Training Pending',  cls: 'badge-amber' },
+  training_done:   { label: 'Training Done',     cls: 'badge-teal' },
+  verified:        { label: 'Verified',          cls: 'badge-teal' },
+  active:          { label: 'Active',            cls: 'badge-green' },
+  suspended:       { label: 'Suspended',         cls: 'badge-red' },
+};
+
+const CONDITION_COLOR = {
+  excellent:'#1db87a', good:'#4f6ef7', fair:'#f5a623',
+  poor:'#e84545', maintenance:'#8b91a8', scrapped:'#545a70'
+};
+
+// ─── Sample Data ──────────────────────────────────────────────────────────────
+const RIDERS = [
+  { id:'R001', name:'Ravi Kumar', phone:'+91 98765 43210', hub:'Koramangala', city:'Bengaluru', status:'kyc_review', score:78, progress:75, joined:'15 Jan 2025', docs:4, dob:'12/08/1997', address:'14, 3rd Cross, Koramangala 5th Block' },
+  { id:'R002', name:'Priya Sharma', phone:'+91 87654 32109', hub:'Whitefield', city:'Bengaluru', status:'active', score:92, progress:100, joined:'03 Jan 2025', docs:5, dob:'22/03/1995', address:'28, Varthur Main Road' },
+  { id:'R003', name:'Mohammed Rafiq', phone:'+91 76543 21098', hub:'Madhapur', city:'Hyderabad', status:'training_pending', score:65, progress:60, joined:'18 Jan 2025', docs:3, dob:'05/11/1999', address:'7, Hitech City Phase 2' },
+  { id:'R004', name:'Lakshmi Devi', phone:'+91 65432 10987', hub:'Adyar', city:'Chennai', status:'applied', score:45, progress:25, joined:'20 Jan 2025', docs:1, dob:'30/06/2001', address:'3, Lattice Bridge Road' },
+  { id:'R005', name:'Arjun Singh', phone:'+91 54321 09876', hub:'Andheri', city:'Mumbai', status:'kyc_rejected', score:30, progress:40, joined:'10 Jan 2025', docs:2, dob:'17/09/1998', address:'A-4, MIDC Andheri East' },
+  { id:'R006', name:'Sunita Yadav', phone:'+91 43210 98765', hub:'Koramangala', city:'Bengaluru', status:'verified', score:88, progress:95, joined:'05 Jan 2025', docs:5, dob:'11/02/1994', address:'22, HSR Layout Sector 6' },
+  { id:'R007', name:'Deepak Mehra', phone:'+91 32109 87654', hub:'Whitefield', city:'Bengaluru', status:'docs_uploaded', score:55, progress:50, joined:'22 Jan 2025', docs:4, dob:'28/07/2000', address:'67, ITPL Main Road' },
+  { id:'R008', name:'Kavita Nair', phone:'+91 21098 76543', hub:'Koramangala', city:'Bengaluru', status:'active', score:95, progress:100, joined:'01 Jan 2025', docs:5, dob:'14/04/1993', address:'8, Indiranagar 100 Feet Road' },
+  { id:'R009', name:'Santosh Patil', phone:'+91 10987 65432', hub:'Madhapur', city:'Hyderabad', status:'training_done', score:71, progress:85, joined:'12 Jan 2025', docs:5, dob:'03/12/1996', address:'15, Gachibowli' },
+  { id:'R010', name:'Geeta Bisht', phone:'+91 09876 54321', hub:'Andheri', city:'Mumbai', status:'docs_pending', score:20, progress:15, joined:'24 Jan 2025', docs:0, dob:'', address:'' },
+];
+
+const VEHICLES = [
+  { id:'V001', reg:'KA01EV2341', type:'EV 2-Wheeler', make:'Bounce', model:'Infinity E1', hub:'Koramangala', available:true, battery:82, condition:'excellent', km:3240 },
+  { id:'V002', reg:'KA01EV2342', type:'EV 2-Wheeler', make:'Ather', model:'450X', hub:'Koramangala', available:false, battery:54, condition:'good', km:8910 },
+  { id:'V003', reg:'KA05EV3310', type:'EV 3-Wheeler', make:'Mahindra', model:'Treo Zor', hub:'Whitefield', available:true, battery:91, condition:'excellent', km:1450 },
+  { id:'V004', reg:'TS07EV1122', type:'EV 2-Wheeler', make:'Ampere', model:'Magnus EX', hub:'Madhapur', available:false, battery:28, condition:'fair', km:12300 },
+  { id:'V005', reg:'KA01EV2399', type:'EV 2-Wheeler', make:'Bounce', model:'Infinity E1', hub:'Koramangala', available:false, battery:0, condition:'maintenance', km:7800 },
+  { id:'V006', reg:'MH02EV9901', type:'EV 2-Wheeler', make:'Ola', model:'S1 Pro', hub:'Andheri', available:true, battery:67, condition:'good', km:5600 },
+  { id:'V007', reg:'TN09EV4455', type:'EV 2-Wheeler', make:'Ampere', model:'Zeal', hub:'Adyar', available:true, battery:100, condition:'excellent', km:200 },
+  { id:'V008', reg:'KA01EV8821', type:'EV 3-Wheeler', make:'Mahindra', model:'Treo', hub:'Koramangala', available:false, battery:45, condition:'good', km:6700 },
+];
+
+const ALLOCATIONS = [
+  { id:'A001', rider:'Priya Sharma', vehicle:'KA01EV2342', plan:'Weekly', start:'20 Jan 2025', end:'27 Jan 2025', rent:179, status:'active' },
+  { id:'A002', rider:'Mohammed Rafiq', vehicle:'TS07EV1122', plan:'Daily', start:'25 Jan 2025', end:'25 Jan 2025', rent:199, status:'active' },
+  { id:'A003', rider:'Kavita Nair', vehicle:'KA01EV8821', plan:'Monthly', start:'01 Jan 2025', end:'31 Jan 2025', rent:159, status:'active' },
+  { id:'A004', rider:'Santosh Patil', vehicle:'KA01EV2341', plan:'Weekly', start:'22 Jan 2025', end:'29 Jan 2025', rent:179, status:'confirmed' },
+  { id:'A005', rider:'Geeta Bisht', vehicle:'MH02EV9901', plan:'Daily', start:'26 Jan 2025', end:'26 Jan 2025', rent:199, status:'pending' },
+];
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+function renderRiders(data) {
+  const tbody = document.getElementById('riders-tbody');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">🔍</div>No riders found</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(r => {
+    const sc = STATUS_CONFIG[r.status] || { label: r.status, cls: 'badge-gray' };
+    const initials = r.name.split(' ').map(w => w[0]).join('').slice(0,2);
+    const progressColor = r.progress >= 80 ? 'var(--green)' : r.progress >= 50 ? 'var(--accent)' : 'var(--amber)';
+    const scoreColor = r.score >= 75 ? 'var(--green)' : r.score >= 50 ? 'var(--amber)' : 'var(--red)';
+    return `
+    <tr>
+      <td>
+        <div class="rider-info">
+          <div class="rider-avatar">${initials}</div>
+          <div>
+            <div class="rider-name">${r.name}</div>
+            <div class="rider-phone">${r.phone}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div style="font-size:13px">${r.hub}</div>
+        <div style="font-size:11px;color:var(--text3)">${r.city}</div>
+      </td>
+      <td><span class="stat-badge ${sc.cls}">${sc.label}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="progress-bar"><div class="progress-fill" style="width:${r.progress}%;background:${progressColor}"></div></div>
+          <span style="font-size:11.5px;color:var(--text3)">${r.progress}%</span>
+        </div>
+      </td>
+      <td><span style="font-size:13px;font-weight:600;color:${scoreColor}">${r.score}</span></td>
+      <td style="font-size:12.5px;color:var(--text3)">${r.joined}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" onclick="openRiderDrawer('${r.id}')">View</button>
+          ${r.status === 'kyc_review' ? `<button class="btn btn-success btn-sm" onclick="approveRider('${r.id}')">✓ Approve</button>` : ''}
+          ${r.status === 'training_done' ? `<button class="btn btn-success btn-sm" onclick="activateRider('${r.id}')">Activate</button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderVehicles(data) {
+  const grid = document.getElementById('vehicle-grid');
+  const batteryColor = b => b > 60 ? '#1db87a' : b > 30 ? '#f5a623' : '#e84545';
+  grid.innerHTML = data.map(v => `
+    <div class="vehicle-card ${!v.available ? 'unavailable' : ''}" onclick="openVehicleDrawer('${v.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">
+        <div class="vc-reg">${v.reg}</div>
+        <span class="stat-badge ${v.available ? 'badge-green' : v.condition === 'maintenance' ? 'badge-amber' : 'badge-gray'}" style="font-size:10px">
+          ${v.available ? 'Available' : v.condition === 'maintenance' ? 'Maintenance' : 'Allocated'}
+        </span>
+      </div>
+      <div class="vc-type">${v.make} ${v.model} · ${v.type}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">📍 ${v.hub}</div>
+      <div class="vc-stats">
+        <div class="vc-stat">
+          <div class="vc-stat-label">Odometer</div>
+          <div class="vc-stat-value">${v.km.toLocaleString()} km</div>
+        </div>
+        <div class="vc-stat">
+          <div class="vc-stat-label">Condition</div>
+          <div class="vc-stat-value" style="color:${CONDITION_COLOR[v.condition]}">${v.condition.charAt(0).toUpperCase()+v.condition.slice(1)}</div>
+        </div>
+      </div>
+      ${v.type.includes('EV') ? `
+      <div style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px">
+          <span>Battery</span><span style="color:${batteryColor(v.battery)}">${v.battery}%</span>
+        </div>
+        <div class="battery-bar"><div class="battery-fill" style="width:${v.battery}%;background:${batteryColor(v.battery)}"></div></div>
+      </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderAllocations(data) {
+  const STATUS = { active:'badge-green', confirmed:'badge-blue', pending:'badge-amber', returned:'badge-gray', cancelled:'badge-red' };
+  document.getElementById('allocations-tbody').innerHTML = data.map(a => `
+    <tr>
+      <td><div class="rider-name">${a.rider}</div></td>
+      <td><span class="vehicle-tag"><span class="vehicle-dot" style="background:var(--accent)"></span>${a.vehicle}</span></td>
+      <td><span class="stat-badge badge-gray" style="font-size:11px">${a.plan}</span></td>
+      <td style="font-size:12.5px;color:var(--text3)">${a.start}</td>
+      <td style="font-size:12.5px;color:var(--text3)">${a.end}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px">₹${a.rent}/day</td>
+      <td><span class="stat-badge ${STATUS[a.status]}">${a.status.charAt(0).toUpperCase()+a.status.slice(1)}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          ${a.status==='pending' ? `<button class="btn btn-success btn-sm" onclick="alert('Confirming allocation')">Confirm</button>` : ''}
+          ${a.status==='confirmed' ? `<button class="btn btn-primary btn-sm" onclick="alert('Activating — handover vehicle')">Handover</button>` : ''}
+          ${a.status==='active' ? `<button class="btn btn-ghost btn-sm" onclick="alert('Return vehicle modal')">Return</button>` : ''}
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ─── Drawer ────────────────────────────────────────────────────────────────────
+function openRiderDrawer(id) {
+  const rider = RIDERS.find(r => r.id === id);
+  if (!rider) return;
+  const sc = STATUS_CONFIG[rider.status] || { label: rider.status, cls: 'badge-gray' };
+  const initials = rider.name.split(' ').map(w => w[0]).join('').slice(0,2);
+
+  document.getElementById('drawer-title').textContent = 'Rider Detail';
+  document.getElementById('drawer-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff">${initials}</div>
+      <div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:2px">${rider.name}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:12.5px;color:var(--text3)">${rider.phone}</div>
+        <div style="margin-top:6px"><span class="stat-badge ${sc.cls}">${sc.label}</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="vc-stat">
+        <div class="vc-stat-label">Onboarding</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${rider.progress}%"></div></div>
+          <span style="font-size:12px;color:var(--text2)">${rider.progress}%</span>
+        </div>
+      </div>
+      <div class="vc-stat">
+        <div class="vc-stat-label">Seriousness Score</div>
+        <div class="vc-stat-value" style="color:${rider.score>=75?'var(--green)':rider.score>=50?'var(--amber)':'var(--red)'}">${rider.score} / 100</div>
+      </div>
+    </div>
+
+    <div class="section-title">Personal Info</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+      <div class="field-group"><div class="field-label">Hub</div><div class="field-value">${rider.hub}</div></div>
+      <div class="field-group"><div class="field-label">City</div><div class="field-value">${rider.city}</div></div>
+      <div class="field-group"><div class="field-label">Date of Birth</div><div class="field-value field-mono">${rider.dob || '—'}</div></div>
+      <div class="field-group"><div class="field-label">Joined</div><div class="field-value">${rider.joined}</div></div>
+    </div>
+    ${rider.address ? `<div class="field-group"><div class="field-label">Address</div><div class="field-value">${rider.address}</div></div>` : ''}
+
+    <div class="section-title">KYC Documents (${rider.docs}/5 uploaded)</div>
+    <div class="doc-grid">
+      ${['Aadhaar Front','Aadhaar Back','Driving Licence','Selfie','PAN Card'].map((d,i) => {
+        const uploaded = i < rider.docs;
+        const status_cls = uploaded ? (rider.status === 'kyc_rejected' && i === 2 ? 'badge-red' : 'badge-green') : 'badge-gray';
+        const status_text = uploaded ? (rider.status === 'kyc_rejected' && i === 2 ? 'Rejected' : 'Approved') : 'Not uploaded';
+        return `<div class="doc-card"><div class="doc-type">${d}</div><div class="doc-status"><span class="stat-badge ${status_cls}" style="font-size:10px">${status_text}</span></div></div>`;
+      }).join('')}
+    </div>
+
+    <div class="section-title">Status History</div>
+    <div class="timeline">
+      <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-title">Applied</div><div class="timeline-time">${rider.joined}</div></div></div>
+      ${rider.docs > 0 ? '<div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-title">Documents uploaded</div><div class="timeline-time">+2 days</div></div></div>' : ''}
+      ${rider.status === 'active' ? '<div class="timeline-item"><div class="timeline-dot" style="background:var(--green)"></div><div class="timeline-content"><div class="timeline-title">Activated by Ops</div><div class="timeline-time">+7 days</div></div></div>' : ''}
+    </div>
+
+    <div class="action-row">
+      ${rider.status === 'kyc_review' ? `
+        <button class="btn btn-success" onclick="approveRider('${rider.id}');closeDrawer()">✓ Approve KYC</button>
+        <button class="btn btn-danger" onclick="alert('Reject KYC — reason modal')">✕ Reject</button>
+      ` : ''}
+      ${rider.status === 'training_done' ? `<button class="btn btn-primary" onclick="activateRider('${rider.id}');closeDrawer()">Activate Rider</button>` : ''}
+      ${rider.status === 'active' ? `<button class="btn btn-danger" onclick="alert('Suspend rider — reason modal')">Suspend</button>` : ''}
+      <button class="btn btn-ghost" onclick="alert('Edit rider profile')">Edit Profile</button>
+    </div>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('rider-drawer').classList.add('open');
+}
+
+function openVehicleDrawer(id) {
+  const v = VEHICLES.find(x => x.id === id);
+  if (!v) return;
+  const bc = v.battery > 60 ? 'var(--green)' : v.battery > 30 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('drawer-title').textContent = 'Vehicle Detail';
+  document.getElementById('drawer-body').innerHTML = `
+    <div style="margin-bottom:20px">
+      <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-0.5px">${v.reg}</div>
+      <div style="color:var(--text3);margin-top:4px">${v.make} ${v.model} · ${v.type}</div>
+      <div style="margin-top:8px"><span class="stat-badge ${v.available?'badge-green':v.condition==='maintenance'?'badge-amber':'badge-gray'}">${v.available?'Available':v.condition==='maintenance'?'In Maintenance':'Allocated'}</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div class="vc-stat"><div class="vc-stat-label">Hub</div><div class="vc-stat-value" style="font-size:13px">${v.hub}</div></div>
+      <div class="vc-stat"><div class="vc-stat-label">Condition</div><div class="vc-stat-value" style="color:${CONDITION_COLOR[v.condition]}">${v.condition}</div></div>
+      <div class="vc-stat"><div class="vc-stat-label">Total KM</div><div class="vc-stat-value">${v.km.toLocaleString()}</div></div>
+      <div class="vc-stat"><div class="vc-stat-label">Battery</div><div class="vc-stat-value" style="color:${bc}">${v.battery}%</div></div>
+    </div>
+    <div class="action-row">
+      ${v.available ? `<button class="btn btn-primary" onclick="alert('Assign vehicle to rider')">Assign to Rider</button>` : ''}
+      <button class="btn btn-ghost" onclick="alert('Log maintenance')">Log Maintenance</button>
+      <button class="btn btn-ghost" onclick="alert('Update battery %')">Update Battery</button>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('rider-drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('rider-drawer').classList.remove('open');
+}
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function approveRider(id) {
+  const rider = RIDERS.find(r => r.id === id);
+  if (rider) { rider.status = 'training_pending'; rider.progress = 80; renderRiders(getFilteredRiders()); }
+}
+
+function activateRider(id) {
+  const rider = RIDERS.find(r => r.id === id);
+  if (rider) { rider.status = 'active'; rider.progress = 100; renderRiders(getFilteredRiders()); }
+}
+
+// ─── Filtering ────────────────────────────────────────────────────────────────
+function getFilteredRiders() {
+  return RIDERS.filter(r => {
+    const matchStatus = currentStatusFilter === 'all' || r.status === currentStatusFilter;
+    const matchSearch = !searchQuery || r.name.toLowerCase().includes(searchQuery) || r.phone.includes(searchQuery);
+    return matchStatus && matchSearch;
+  });
+}
+
+function filterStatus(s, el) {
+  currentStatusFilter = s;
+  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderRiders(getFilteredRiders());
+}
+
+function filterRiders(q) {
+  searchQuery = q.toLowerCase();
+  renderRiders(getFilteredRiders());
+}
+
+function filterHub(hub) { renderRiders(RIDERS); }
+
+function filterVehicles(filter, el) {
+  document.querySelectorAll('#page-vehicles .tab').forEach(t => t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  let data = VEHICLES;
+  if (filter === 'available') data = VEHICLES.filter(v => v.available);
+  if (filter === 'allocated') data = VEHICLES.filter(v => !v.available && v.condition !== 'maintenance');
+  if (filter === 'maintenance') data = VEHICLES.filter(v => v.condition === 'maintenance');
+  renderVehicles(data);
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function setPage(page) {
+  currentPage = page;
+  ['onboarding','vehicles','fleet'].forEach(p => {
+    const el = document.getElementById(`page-${p}`);
+    if (el) el.style.display = p === page ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const titles = { onboarding: 'Rider Onboarding', vehicles: 'Vehicle Allocation', fleet: 'Fleet Management' };
+  document.getElementById('page-title').textContent = titles[page] || page;
+
+  const actionBtn = document.getElementById('primary-action');
+  const actions = { onboarding: '+ Add Rider', vehicles: '+ Add Vehicle', fleet: '+ Assign Vehicle' };
+  actionBtn.textContent = actions[page] || 'Add';
+}
+
+function handlePrimaryAction() {
+  const actions = { onboarding: 'Add Rider modal coming soon', vehicles: 'Add Vehicle modal coming soon', fleet: 'Assign Vehicle modal coming soon' };
+  alert(actions[currentPage]);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderRiders(RIDERS);
+renderVehicles(VEHICLES);
+renderAllocations(ALLOCATIONS);
+</script>
+</body>
+</html>

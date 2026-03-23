@@ -1,0 +1,38 @@
+name: yana_rider
+description: Yana Rider App - EV Fleet Platform for delivery riders
+
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.5.1
+
+  # Navigation
+  go_router: ^13.2.3
+
+  # HTTP client
+  dio: ^5.4.3
+
+  # Secure storage (JWT tokens)
+  flutter_secure_storage: ^9.0.0
+
+  # Image picking (KYC document upload)
+  image_picker: ^1.0.7
+
+  # UI utilities
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
